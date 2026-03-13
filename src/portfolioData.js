@@ -91,13 +91,7 @@ export const education = [
     degree: 'Master of Computer Application',
     school: 'FISAT, Angamaly',
     period: 'May 2025',
-    detail: 'SGPA: 8.41',
-  },
-  {
-    degree: 'Bachelor of Computer Science',
-    school: 'MCAS Moodadi, Kozhikode',
-    period: 'April 2023',
-    detail: 'CGPA: 6.66',
+    detail: 'CGPA: 8.27',
   },
 ]
 

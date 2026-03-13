@@ -135,8 +135,8 @@ function AboutPage() {
           <h3>Education</h3>
           <div className="education-list">
             {education.map((item) => (
-              <div key={item.degree}>
-                <p className="group-title">{item.degree}</p>
+              <div key={item.school}>
+                {item.degree ? <p className="group-title">{item.degree}</p> : null}
                 <p>{item.school}</p>
                 <p>
                   {item.period} • {item.detail}
