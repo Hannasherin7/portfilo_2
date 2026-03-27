@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { profile } from '../portfolioData'
 
@@ -14,10 +14,13 @@ const navItems = [
 
 function Layout() {
   const location = useLocation()
+  const auraRef = useRef(null)
+  const auraSecondaryRef = useRef(null)
   const [introDone, setIntroDone] = useState(false)
   const [introPhase, setIntroPhase] = useState('greeting')
   const [greetingIndex, setGreetingIndex] = useState(0)
   const [isScrolled, setIsScrolled] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const isHome = location.pathname === '/'
 
   useEffect(() => {
@@ -58,6 +61,65 @@ function Layout() {
     }
   }, [location.pathname])
 
+  useEffect(() => {
+    setMenuOpen(false)
+  }, [location.pathname])
+
+  useEffect(() => {
+    const primary = auraRef.current
+    const secondary = auraSecondaryRef.current
+
+    if (!primary || !secondary) {
+      return undefined
+    }
+
+    let mouseX = window.innerWidth / 2
+    let mouseY = window.innerHeight / 2
+    let currentX = mouseX
+    let currentY = mouseY
+    let currentSecondaryX = mouseX
+    let currentSecondaryY = mouseY
+    let frameId = 0
+
+    const interactiveSelector =
+      'a, button, .nav-link, .site-editorial-highlights article, .site-editorial-note-list article, .site-editorial-work-row, .site-editorial-project-row, .site-editorial-contact-grid article, .about-editorial-row, .about-editorial-skill-group, .about-editorial-panel, .site-editorial-detail-grid article, .site-editorial-detail-features, .site-editorial-more-link, .site-editorial-resume-frame, .footer-shared-grid > div'
+
+    const render = () => {
+      currentX += (mouseX - currentX) * 0.16
+      currentY += (mouseY - currentY) * 0.16
+      currentSecondaryX += (mouseX - currentSecondaryX) * 0.08
+      currentSecondaryY += (mouseY - currentSecondaryY) * 0.08
+
+      primary.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`
+      secondary.style.transform = `translate3d(${currentSecondaryX}px, ${currentSecondaryY}px, 0)`
+
+      frameId = window.requestAnimationFrame(render)
+    }
+
+    const handleMove = (event) => {
+      mouseX = event.clientX
+      mouseY = event.clientY
+
+      const interactiveTarget = event.target.closest(interactiveSelector)
+      document.documentElement.classList.toggle('pointer-hovering', Boolean(interactiveTarget))
+    }
+
+    const handleLeave = () => {
+      document.documentElement.classList.remove('pointer-hovering')
+    }
+
+    frameId = window.requestAnimationFrame(render)
+    window.addEventListener('mousemove', handleMove)
+    window.addEventListener('mouseout', handleLeave)
+
+    return () => {
+      window.cancelAnimationFrame(frameId)
+      window.removeEventListener('mousemove', handleMove)
+      window.removeEventListener('mouseout', handleLeave)
+      document.documentElement.classList.remove('pointer-hovering')
+    }
+  }, [])
+
   return (
     <div className={`site-shell${introDone ? ' intro-done' : ''}${isHome ? ' site-shell-home' : ''}`}>
       <div className={`site-intro${introDone ? ' is-leaving' : ''}`} aria-hidden="true">
@@ -93,24 +155,36 @@ function Layout() {
       <div className="floating-line line-one" aria-hidden="true" />
       <div className="floating-line line-two" aria-hidden="true" />
       <div className="floating-dots" aria-hidden="true" />
+      <div ref={auraRef} className="pointer-aura" aria-hidden="true" />
+      <div ref={auraSecondaryRef} className="pointer-aura pointer-aura-secondary" aria-hidden="true" />
 
       <header className={`topbar${isHome ? ' topbar-home' : ''}${isScrolled ? ' is-scrolled' : ''}`}>
-        <NavLink className="brand" to="/">
-          {profile.name}
-        </NavLink>
+        <div className={`nav-shell${menuOpen ? ' is-open' : ''}`}>
+          <button
+            type="button"
+            className={`nav-toggle${menuOpen ? ' is-open' : ''}`}
+            aria-expanded={menuOpen}
+            aria-label="Toggle navigation menu"
+            onClick={() => setMenuOpen((current) => !current)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
 
-        <nav className="nav">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.href}
-              className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
-              to={item.href}
-              end={item.href === '/'}
-            >
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
+          <nav className={`nav-menu${menuOpen ? ' is-open' : ''}`}>
+            {navItems.map((item) => (
+              <NavLink
+                key={item.href}
+                className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+                to={item.href}
+                end={item.href === '/'}
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </nav>
+        </div>
       </header>
 
       <div key={location.pathname} className="page-stage">
