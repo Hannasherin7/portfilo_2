@@ -1,109 +1,58 @@
+import RevealSection from '../components/RevealSection'
 import { education, experience, extras, profile, skills } from '../portfolioData'
 
 const skillGroups = Object.entries(skills)
 
 function AboutPage() {
   return (
-    <main className="page about-page">
-      <section className="about-hero">
-        <div className="about-hero-copy">
+    <main className="page inner-page about-editorial-page">
+      <RevealSection className="about-editorial-hero" delay={40}>
+        <div className="about-editorial-copy">
           <p className="eyebrow">About</p>
-          <h1>Hi, I&apos;m Hanna. I build software that feels clear, dependable, and grounded in strong logic.</h1>
-          <p className="lede narrow">{profile.intro}</p>
-          <p className="about-hero-note">
-            I currently work on backend-heavy development, and I am especially interested in
-            programming-focused work where data structures, algorithms, and system logic matter.
-          </p>
+          <h1>Software developer focused on clarity, structure, and dependable systems.</h1>
+          <p className="lede">{profile.intro}</p>
+          <p className="about-editorial-note">{profile.personalStatement}</p>
         </div>
 
-        <aside className="about-hero-visual" aria-hidden="true">
-          <div className="about-tech-cluster cluster-one">
-            <span className="cluster-node" />
-            <span className="cluster-node" />
-            <span className="cluster-node" />
-            <span className="cluster-link link-a" />
-            <span className="cluster-link link-b" />
+        <aside className="about-editorial-meta">
+          <div className="about-editorial-meta-block">
+            <p className="card-label">Currently</p>
+            <h2>{profile.shortName}</h2>
+            <p>{profile.summary}</p>
           </div>
-          <div className="about-tech-cluster cluster-two">
-            <span className="cluster-node small" />
-            <span className="cluster-node small" />
-            <span className="cluster-node small" />
-            <span className="cluster-link vertical" />
-            <span className="cluster-link horizontal" />
-          </div>
-          <div className="about-tech-chip chip-one" />
-          <div className="about-tech-chip chip-two" />
-          <div className="about-desk-card">
-            <div className="about-window">
-              <span />
-              <span />
-              <span />
+
+          <div className="about-editorial-meta-list">
+            <div>
+              <p className="card-label">Location</p>
+              <p>{profile.location}</p>
             </div>
-            <div className="about-desk-illustration">
-              <div className="desk-glow" />
-              <div className="desk-laptop" />
-              <div className="desk-mug" />
-              <div className="desk-plant" />
-              <div className="desk-book" />
-              <div className="mini-person">
-                <div className="mini-hair" />
-                <div className="mini-head" />
-                <div className="mini-body" />
-              </div>
+            <div>
+              <p className="card-label">Email</p>
+              <p>{profile.email}</p>
+            </div>
+            <div>
+              <p className="card-label">Phone</p>
+              <p>{profile.phone}</p>
             </div>
           </div>
         </aside>
-      </section>
+      </RevealSection>
 
-      <section className="about-story-grid">
-        <article className="about-story-card feature-panel">
-          <div className="about-card-copy">
-            <p className="card-label">A quick intro</p>
-            <h3>I like thoughtful products more than flashy ones.</h3>
-            <p>{profile.personalStatement}</p>
-          </div>
-          <div className="side-illustration notebook-illustration" aria-hidden="true">
-            <span className="note-sheet" />
-            <span className="note-line" />
-            <span className="note-line second" />
-            <span className="note-pin" />
-          </div>
-        </article>
-
-        <article className="about-story-card feature-panel">
-          <div className="about-card-copy">
-            <p className="card-label">What keeps me interested</p>
-            <h3>Programming depth with dependable software structure.</h3>
-            <p>
-              I am most comfortable on projects that need strong logic, structured APIs, and data
-              models that stay readable as the system grows.
-            </p>
-          </div>
-          <div className="side-illustration browser-illustration" aria-hidden="true">
-            <span className="browser-top" />
-            <span className="browser-panel left" />
-            <span className="browser-panel right" />
-          </div>
-        </article>
-      </section>
-
-      <section className="section split">
+      <RevealSection className="about-editorial-section" delay={80}>
         <div className="section-heading">
           <p className="eyebrow">Experience</p>
-          <h2>Recent roles and the kind of work behind them.</h2>
+          <h2>Recent roles and the work behind them.</h2>
         </div>
-        <div className="timeline">
-          {experience.map((item, index) => (
-            <article className="timeline-item illustrated-timeline" key={item.role}>
-              <div className="timeline-illustration" aria-hidden="true">
-                <span className={`timeline-icon ${index === 0 ? 'network' : 'stack'}`} />
+
+        <div className="about-editorial-timeline">
+          {experience.map((item) => (
+            <article className="about-editorial-row" key={item.role}>
+              <div className="about-editorial-period">{item.period}</div>
+              <div className="about-editorial-role">
+                <h3>{item.role}</h3>
+                <p>{item.company}</p>
               </div>
-              <div className="timeline-content">
-                <p className="timeline-period">{item.period}</p>
-                <h3>
-                  {item.role}
-                  <span>{item.company}</span>
-                </h3>
+              <div className="about-editorial-body">
                 <p>{item.description}</p>
                 <ul className="bullet-list">
                   {item.bullets.map((bullet) => (
@@ -114,71 +63,66 @@ function AboutPage() {
             </article>
           ))}
         </div>
-      </section>
+      </RevealSection>
 
-      <section className="section about-capabilities">
-        <div className="section-heading capabilities-heading">
+      <RevealSection className="about-editorial-section" delay={120}>
+        <div className="section-heading">
           <p className="eyebrow">Capabilities</p>
-          <h2>Tools, stacks, and foundations I keep returning to.</h2>
+          <h2>Tools, stacks, and fundamentals I keep returning to.</h2>
         </div>
-        <article className="panel illustrated-panel">
-          <div className="skill-groups">
-            {skillGroups.map(([group, items]) => (
-              <div key={group}>
-                <p className="group-title">{group}</p>
-                <ul>
-                  {items.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-          <div className="panel-illustration chips-illustration" aria-hidden="true">
-            <span />
-            <span />
-            <span />
-          </div>
-        </article>
-      </section>
 
-      <section className="section notes-grid">
-        <article className="panel about-info-panel">
-          <div className="panel-icon graduate-illustration" aria-hidden="true" />
-          <h3>Education</h3>
-          <div className="education-list">
-            {education.map((item) => (
-              <div key={item.school}>
-                {item.degree ? <p className="group-title">{item.degree}</p> : null}
-                <p>{item.school}</p>
-                <p>
-                  {item.period} • {item.detail}
-                </p>
+        <div className="about-editorial-skills">
+          {skillGroups.map(([group, items]) => (
+            <article className="about-editorial-skill-group" key={group}>
+              <p className="group-title">{group}</p>
+              <div className="about-editorial-chip-wrap">
+                {items.map((item) => (
+                  <span className="about-editorial-chip" key={item}>
+                    {item}
+                  </span>
+                ))}
               </div>
-            ))}
-          </div>
+            </article>
+          ))}
+        </div>
+      </RevealSection>
+
+      <RevealSection className="about-editorial-grid" delay={160}>
+        <article className="about-editorial-panel">
+          <p className="card-label">Education</p>
+          {education.map((item) => (
+            <div key={item.school} className="about-editorial-panel-block">
+              <h3>{item.degree}</h3>
+              <p>{item.school}</p>
+              <p>
+                {item.period} - {item.detail}
+              </p>
+            </div>
+          ))}
         </article>
 
-        <article className="panel about-info-panel">
-          <div className="panel-icon star-illustration" aria-hidden="true" />
-          <h3>Strengths</h3>
-          <ul className="tag-list">
+        <article className="about-editorial-panel">
+          <p className="card-label">Strengths</p>
+          <div className="about-editorial-chip-wrap">
             {extras.traits.map((item) => (
-              <li key={item}>{item}</li>
+              <span className="about-editorial-chip" key={item}>
+                {item}
+              </span>
             ))}
-          </ul>
+          </div>
         </article>
 
-        <article className="panel about-info-panel">
-          <div className="panel-icon flower-illustration" aria-hidden="true" />
-          <h3>Beyond work</h3>
-          <ul className="tag-list">
+        <article className="about-editorial-panel">
+          <p className="card-label">Beyond work</p>
+          <div className="about-editorial-chip-wrap">
             {extras.interests.concat(extras.activities).map((item) => (
-              <li key={item}>{item}</li>
+              <span className="about-editorial-chip" key={item}>
+                {item}
+              </span>
             ))}
-          </ul>
+          </div>
         </article>
-      </section>
+      </RevealSection>
     </main>
   )
 }

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { profile } from '../portfolioData'
+
+const introGreetings = ['Hello', 'Bonjour', 'Hola', 'Namaste', 'Ciao', 'Hallo']
 
 const navItems = [
   { label: 'Home', href: '/' },
@@ -11,38 +13,74 @@ const navItems = [
 ]
 
 function Layout() {
+  const location = useLocation()
   const [introDone, setIntroDone] = useState(false)
+  const [introPhase, setIntroPhase] = useState('greeting')
+  const [greetingIndex, setGreetingIndex] = useState(0)
+  const [isScrolled, setIsScrolled] = useState(false)
+  const isHome = location.pathname === '/'
 
   useEffect(() => {
+    const greetingTimer = window.setInterval(() => {
+      setGreetingIndex((current) => (current + 1) % introGreetings.length)
+    }, 240)
+
+    const smileTimer = window.setTimeout(() => {
+      setIntroPhase('smile')
+    }, 1700)
+
+    const infoTimer = window.setTimeout(() => {
+      setIntroPhase('info')
+    }, 2550)
+
     const timer = window.setTimeout(() => {
       setIntroDone(true)
-    }, 2400)
+    }, 3600)
 
     return () => {
+      window.clearInterval(greetingTimer)
+      window.clearTimeout(smileTimer)
+      window.clearTimeout(infoTimer)
       window.clearTimeout(timer)
     }
   }, [])
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 18)
+    }
+
+    handleScroll()
+    window.addEventListener('scroll', handleScroll, { passive: true })
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+    }
+  }, [location.pathname])
+
   return (
-    <div className={`site-shell${introDone ? ' intro-done' : ''}`}>
+    <div className={`site-shell${introDone ? ' intro-done' : ''}${isHome ? ' site-shell-home' : ''}`}>
       <div className={`site-intro${introDone ? ' is-leaving' : ''}`} aria-hidden="true">
         <div className="site-intro-core">
-          <div className="intro-circle">
-            <svg viewBox="0 0 220 220" className="intro-circle-svg">
-              <circle cx="110" cy="110" r="84" pathLength="100" className="intro-ring-base" />
-              <circle cx="110" cy="110" r="68" pathLength="100" className="intro-ring-inner" />
-              <path d="M64 110H92L108 82L126 138L144 110H156" className="intro-signal-line" />
-              <circle cx="64" cy="110" r="5" className="intro-node" />
-              <circle cx="108" cy="82" r="5" className="intro-node" />
-              <circle cx="126" cy="138" r="5" className="intro-node" />
-              <circle cx="156" cy="110" r="5" className="intro-node" />
-            </svg>
-            <div className="intro-circle-bloom" />
-            <div className="intro-circle-grid" />
+          <div className={`intro-stage intro-stage-${introPhase}`}>
+            <div className="intro-greeting-stack">
+              <p className="intro-greeting-current">{introGreetings[greetingIndex]}</p>
+            </div>
+
+            <div className="intro-smiley" role="presentation">
+              <svg viewBox="0 0 220 220" className="intro-smiley-svg" aria-hidden="true">
+                <circle cx="110" cy="110" r="82" pathLength="100" className="intro-smiley-ring" />
+                <circle cx="84" cy="95" r="4.5" className="intro-smiley-eye" />
+                <circle cx="136" cy="95" r="4.5" className="intro-smiley-eye" />
+                <path d="M82 130C92 142 102 147 110 147C118 147 128 142 138 130" className="intro-smiley-mouth" />
+              </svg>
+            </div>
+
+            <div className="intro-name-lockup">
+              <h2>{profile.shortName}</h2>
+              <p className="intro-text">Software developer</p>
+            </div>
           </div>
-          <p className="intro-kicker">Launching portfolio</p>
-          <h2>{profile.shortName}</h2>
-          <p className="intro-text">Design, motion, and code coming into focus.</p>
         </div>
       </div>
 
@@ -56,7 +94,7 @@ function Layout() {
       <div className="floating-line line-two" aria-hidden="true" />
       <div className="floating-dots" aria-hidden="true" />
 
-      <header className="topbar">
+      <header className={`topbar${isHome ? ' topbar-home' : ''}${isScrolled ? ' is-scrolled' : ''}`}>
         <NavLink className="brand" to="/">
           {profile.name}
         </NavLink>
@@ -75,12 +113,33 @@ function Layout() {
         </nav>
       </header>
 
-      <Outlet />
+      <div key={location.pathname} className="page-stage">
+        <Outlet />
+      </div>
 
-      <footer className="footer">
-        <p>{profile.name}</p>
-        <p>{profile.email}</p>
-        <p>Built with React and Vite.</p>
+      <footer className="footer footer-shared">
+        <div className="footer-shared-grid">
+          <div>
+            <p className="footer-label">Contact</p>
+            <a href={`mailto:${profile.email}`}>{profile.email}</a>
+            <a href={`tel:${profile.phone.replace(/\s+/g, '')}`}>{profile.phone}</a>
+          </div>
+
+          <div>
+            <p className="footer-label">Location</p>
+            <p>{profile.location}</p>
+            <p>Open to software roles and collaborative product work.</p>
+          </div>
+
+          <div>
+            <p className="footer-label">Socials</p>
+            {profile.links.map((link) => (
+              <a key={link.label} href={link.href} target="_blank" rel="noreferrer">
+                {link.label}
+              </a>
+            ))}
+          </div>
+        </div>
       </footer>
     </div>
   )

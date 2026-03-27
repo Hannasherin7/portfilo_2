@@ -1,37 +1,33 @@
 import { Link } from 'react-router-dom'
+import RevealSection from '../components/RevealSection'
 import { projects } from '../portfolioData'
 
 function ProjectsPage() {
   return (
-    <main className="page">
-      <section className="page-hero">
+    <main className="page inner-page site-editorial-page">
+      <RevealSection className="site-editorial-page-hero" delay={40}>
         <p className="eyebrow">Projects</p>
-        <h1>Selected work across programming-focused builds, machine learning features, and product-style software systems.</h1>
-        <p className="lede narrow">
-          These projects reflect how I think about structure, workflows, and user-facing clarity.
+        <h1>Selected work across programming-focused builds and product-style systems.</h1>
+        <p className="lede">
+          These projects reflect how I think about workflows, clarity, and system structure.
         </p>
-      </section>
+      </RevealSection>
 
-      <section className="project-listing">
+      <RevealSection className="site-editorial-project-list" delay={90}>
         {projects.map((project, index) => (
-          <article className={`project-row ${index % 2 === 0 ? 'left' : 'right'}`} key={project.slug}>
-            <div className="project-number">0{index + 1}</div>
-            <div className="project-row-body">
+          <article className="site-editorial-project-row" key={project.slug}>
+            <div className="site-editorial-project-index">0{index + 1}</div>
+            <div className="site-editorial-project-head">
               <p className="card-label">{project.eyebrow}</p>
               <h2>{project.name}</h2>
-              <p>{project.summary}</p>
-              <ul className="mini-tags">
-                {project.stack.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-              <Link className="text-link" to={`/projects/${project.slug}`}>
-                Open case study
-              </Link>
             </div>
+            <p className="site-editorial-project-summary">{project.summary}</p>
+            <Link className="text-link" to={`/projects/${project.slug}`}>
+              Open case study
+            </Link>
           </article>
         ))}
-      </section>
+      </RevealSection>
     </main>
   )
 }

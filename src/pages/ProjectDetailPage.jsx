@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
+import RevealSection from '../components/RevealSection'
 import { projects } from '../portfolioData'
 
 function ProjectDetailPage() {
@@ -6,70 +7,59 @@ function ProjectDetailPage() {
   const project = projects.find((item) => item.slug === slug)
 
   if (!project) {
-    return (
-      <main className="page">
-        <section className="page-hero">
+      return (
+        <main className="page inner-page site-editorial-page">
+        <RevealSection className="site-editorial-page-hero" delay={40}>
           <p className="eyebrow">Project</p>
           <h1>Project not found.</h1>
           <Link className="text-link" to="/projects">
             Back to projects
           </Link>
-        </section>
-      </main>
-    )
+        </RevealSection>
+        </main>
+      )
   }
 
   return (
-    <main className="page">
-      <section className="page-hero detail-hero">
+    <main className="page inner-page site-editorial-page">
+      <RevealSection className="site-editorial-page-hero" delay={40}>
         <p className="eyebrow">{project.eyebrow}</p>
         <h1>{project.name}</h1>
-        <p className="lede narrow">{project.summary}</p>
-        <ul className="mini-tags">
-          {project.stack.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-      </section>
+        <p className="lede">{project.summary}</p>
+      </RevealSection>
 
-      <section className="section detail-grid">
-        <article className="panel">
-          <p className="group-title">Challenge</p>
+      <RevealSection className="site-editorial-detail-grid" delay={90}>
+        <article>
+          <p className="card-label">Challenge</p>
           <p>{project.challenge}</p>
         </article>
-        <article className="panel">
-          <p className="group-title">Approach</p>
+        <article>
+          <p className="card-label">Approach</p>
           <p>{project.solution}</p>
         </article>
-        <article className="panel">
-          <p className="group-title">Outcome</p>
+        <article>
+          <p className="card-label">Outcome</p>
           <p>{project.outcome}</p>
         </article>
-      </section>
+      </RevealSection>
 
-      <section className="section split">
+      <RevealSection className="site-editorial-detail-features" delay={130}>
         <div className="section-heading">
           <p className="eyebrow">Feature breakdown</p>
           <h2>Key parts of the system.</h2>
         </div>
-        <article className="panel">
-          <ul className="bullet-list">
-            {project.features.map((feature) => (
-              <li key={feature}>{feature}</li>
-            ))}
-          </ul>
-        </article>
-      </section>
+        <ul className="bullet-list">
+          {project.features.map((feature) => (
+            <li key={feature}>{feature}</li>
+          ))}
+        </ul>
+      </RevealSection>
 
-      <section className="section contact-banner">
-        <div>
-          <p className="eyebrow">More work</p>
-          <h2>Interested in how I approach other projects?</h2>
-        </div>
-        <Link className="button primary" to="/projects">
+      <RevealSection className="site-editorial-more-link" delay={170}>
+        <Link className="text-link" to="/projects">
           Browse more projects
         </Link>
-      </section>
+      </RevealSection>
     </main>
   )
 }
