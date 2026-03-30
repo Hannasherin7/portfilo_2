@@ -1,6 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { forwardRef, useEffect, useRef, useState } from 'react'
 
-function RevealSection({ as: Tag = 'section', className = '', children, delay = 0 }) {
+const RevealSection = forwardRef(function RevealSection(
+  { as: Tag = 'section', className = '', children, delay = 0, ...props },
+  forwardedRef
+) {
   const ref = useRef(null)
   const [visible, setVisible] = useState(false)
 
@@ -25,13 +28,22 @@ function RevealSection({ as: Tag = 'section', className = '', children, delay = 
 
   return (
     <Tag
-      ref={ref}
+      ref={(node) => {
+        ref.current = node
+
+        if (typeof forwardedRef === 'function') {
+          forwardedRef(node)
+        } else if (forwardedRef) {
+          forwardedRef.current = node
+        }
+      }}
       className={`${className} reveal-section${visible ? ' is-visible' : ''}`}
       style={{ transitionDelay: `${delay}ms` }}
+      {...props}
     >
       {children}
     </Tag>
   )
-}
+})
 
 export default RevealSection

@@ -3,6 +3,16 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { profile } from '../portfolioData'
 
 const introGreetings = ['Hello', 'Bonjour', 'Hola', 'Namaste', 'Ciao', 'Hallo']
+const introBurstOffsets = [
+  { x: -52, y: 18, rotate: -18 },
+  { x: -28, y: -26, rotate: -10 },
+  { x: 0, y: 20, rotate: 0 },
+  { x: 30, y: -24, rotate: 12 },
+  { x: 56, y: 14, rotate: 20 },
+  { x: 76, y: -10, rotate: 26 },
+  { x: 96, y: 18, rotate: 32 },
+  { x: 118, y: -18, rotate: 38 },
+]
 
 const navItems = [
   { label: 'Home', href: '/' },
@@ -17,36 +27,47 @@ function Layout() {
   const auraRef = useRef(null)
   const auraSecondaryRef = useRef(null)
   const [introDone, setIntroDone] = useState(false)
-  const [introPhase, setIntroPhase] = useState('greeting')
+  const [introPhase, setIntroPhase] = useState('smile')
   const [greetingIndex, setGreetingIndex] = useState(0)
   const [isScrolled, setIsScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const isHome = location.pathname === '/'
 
   useEffect(() => {
-    const greetingTimer = window.setInterval(() => {
-      setGreetingIndex((current) => (current + 1) % introGreetings.length)
-    }, 240)
+    const greetingPhaseTimer = window.setTimeout(() => {
+      setGreetingIndex(0)
+      setIntroPhase('greeting')
+    }, 2200)
 
-    const smileTimer = window.setTimeout(() => {
-      setIntroPhase('smile')
-    }, 1700)
-
-    const infoTimer = window.setTimeout(() => {
-      setIntroPhase('info')
-    }, 2550)
+    const burstPhaseTimer = window.setTimeout(() => {
+      setGreetingIndex(0)
+      setIntroPhase('burst')
+    }, 3750)
 
     const timer = window.setTimeout(() => {
       setIntroDone(true)
-    }, 3600)
+    }, 4550)
 
     return () => {
-      window.clearInterval(greetingTimer)
-      window.clearTimeout(smileTimer)
-      window.clearTimeout(infoTimer)
+      window.clearTimeout(greetingPhaseTimer)
+      window.clearTimeout(burstPhaseTimer)
       window.clearTimeout(timer)
     }
   }, [])
+
+  useEffect(() => {
+    if (introPhase !== 'greeting') {
+      return undefined
+    }
+
+    const greetingCycleTimer = window.setInterval(() => {
+      setGreetingIndex((current) => (current + 1) % introGreetings.length)
+    }, 240)
+
+    return () => {
+      window.clearInterval(greetingCycleTimer)
+    }
+  }, [introPhase])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -120,21 +141,56 @@ function Layout() {
     }
   }, [])
 
+  const currentGreeting = introGreetings[greetingIndex]
+  const greetingLetters = currentGreeting.split('')
+
   return (
     <div className={`site-shell${introDone ? ' intro-done' : ''}${isHome ? ' site-shell-home' : ''}`}>
       <div className={`site-intro${introDone ? ' is-leaving' : ''}`} aria-hidden="true">
         <div className="site-intro-core">
           <div className={`intro-stage intro-stage-${introPhase}`}>
             <div className="intro-greeting-stack">
-              <p className="intro-greeting-current">{introGreetings[greetingIndex]}</p>
+              <p className="intro-greeting-current" aria-label={currentGreeting}>
+                {greetingLetters.map((letter, index) => {
+                  const burstOffset = introBurstOffsets[index] ?? introBurstOffsets[introBurstOffsets.length - 1]
+
+                  return (
+                  <span
+                    key={`${currentGreeting}-${index}-${letter === ' ' ? 'space' : letter}`}
+                    className="intro-greeting-letter"
+                    style={{
+                      '--intro-letter-index': index,
+                      '--intro-burst-x': `${burstOffset.x}px`,
+                      '--intro-burst-y': `${burstOffset.y}px`,
+                      '--intro-burst-rotate': `${burstOffset.rotate}deg`,
+                    }}
+                  >
+                    {letter === ' ' ? '\u00A0' : letter}
+                  </span>
+                  )
+                })}
+              </p>
             </div>
 
             <div className="intro-smiley" role="presentation">
               <svg viewBox="0 0 220 220" className="intro-smiley-svg" aria-hidden="true">
-                <circle cx="110" cy="110" r="82" pathLength="100" className="intro-smiley-ring" />
-                <circle cx="84" cy="95" r="4.5" className="intro-smiley-eye" />
-                <circle cx="136" cy="95" r="4.5" className="intro-smiley-eye" />
-                <path d="M82 130C92 142 102 147 110 147C118 147 128 142 138 130" className="intro-smiley-mouth" />
+                <defs>
+                  <path id="intro-smiley-arc-top" d="M 34 110 A 76 76 0 0 1 186 110" />
+                  <path id="intro-smiley-arc-bottom" d="M 186 110 A 76 76 0 0 1 34 110" />
+                </defs>
+                <text className="intro-smiley-copy intro-smiley-copy-top">
+                  <textPath href="#intro-smiley-arc-top" startOffset="50%" textAnchor="middle">
+                    {`${profile.shortName.toUpperCase()}  PORTFOLIO`}
+                  </textPath>
+                </text>
+                <text className="intro-smiley-copy intro-smiley-copy-bottom">
+                  <textPath href="#intro-smiley-arc-bottom" startOffset="50%" textAnchor="middle">
+                    SOFTWARE DEVELOPER
+                  </textPath>
+                </text>
+                <circle cx="84" cy="98" r="7.5" className="intro-smiley-eye" />
+                <circle cx="136" cy="98" r="7.5" className="intro-smiley-eye" />
+                <path d="M92 124H101V133C101 139 105 143 110 143C115 143 119 139 119 133V124H128V133C128 144 120 152 110 152C100 152 92 144 92 133V124Z" className="intro-smiley-mouth" />
               </svg>
             </div>
 
