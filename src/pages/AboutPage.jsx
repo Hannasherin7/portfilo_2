@@ -1,357 +1,225 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import RevealSection from '../components/RevealSection'
 import { education, experience, extras, profile, skills } from '../portfolioData'
 
 const skillGroups = Object.entries(skills)
+const heroHeadline = "Hi, I'm Hanna. I build software that feels clear, dependable, and grounded in strong logic."
 
 function AboutPage() {
-  const sections = useMemo(
-    () => [
-      {
-        id: 'intro',
-        label: 'About',
-        title: 'Personal profile and current snapshot',
-        images: [
-          '/about-film-intro-1.svg',
-          '/about-film-intro-2.svg',
-          '/about-film-intro-3.svg',
-        ],
-      },
-      {
-        id: 'experience',
-        label: 'Experience',
-        title: 'Recent roles and project impact',
-        images: [
-          '/about-film-experience-1.svg',
-          '/about-film-experience-2.svg',
-          '/about-film-experience-3.svg',
-        ],
-      },
-      {
-        id: 'capabilities',
-        label: 'Capabilities',
-        title: 'Tools, stacks, and technical foundation',
-        images: [
-          '/about-film-capabilities-1.svg',
-          '/about-film-capabilities-2.svg',
-          '/about-film-capabilities-3.svg',
-        ],
-      },
-      {
-        id: 'details',
-        label: 'Details',
-        title: 'Education, strengths, and life beyond work',
-        images: [
-          '/about-film-details-1.svg',
-          '/about-film-details-2.svg',
-          '/about-film-details-3.svg',
-        ],
-      },
-    ],
-    []
-  )
-  const [activeSection, setActiveSection] = useState(sections[0].id)
-  const [sectionHeights, setSectionHeights] = useState(() =>
-    sections.reduce((accumulator, section) => {
-      accumulator[section.id] = 1
-      return accumulator
-    }, {})
-  )
-  const [jumpedSection, setJumpedSection] = useState('')
-  const sectionRefs = useRef({})
+  const sectionRefs = useRef([])
+  const [heroSoftened, setHeroSoftened] = useState(false)
 
   useEffect(() => {
-    const elements = sections.map((section) => sectionRefs.current[section.id]).filter(Boolean)
-
-    if (!elements.length) {
-      return undefined
+    const updateHeroState = () => {
+      setHeroSoftened(window.scrollY > 110)
     }
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visibleEntries = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
+    updateHeroState()
+    window.addEventListener('scroll', updateHeroState, { passive: true })
 
-        if (!visibleEntries.length) {
-          return
-        }
-
-        const nextSection = visibleEntries[0].target.getAttribute('data-about-section')
-
-        if (nextSection) {
-          setActiveSection(nextSection)
-        }
-      },
-      {
-        threshold: [0.2, 0.35, 0.5, 0.65, 0.8],
-        rootMargin: '-12% 0px -12% 0px',
-      }
-    )
-
-    elements.forEach((element) => observer.observe(element))
-
-    return () => observer.disconnect()
-  }, [sections])
-
-  useEffect(() => {
-    if (!jumpedSection) {
-      return undefined
-    }
-
-    const timeout = window.setTimeout(() => {
-      setJumpedSection('')
-    }, 900)
-
-    return () => window.clearTimeout(timeout)
-  }, [jumpedSection])
-
-  const jumpToSection = (sectionId) => {
-    const element = sectionRefs.current[sectionId]
-
-    if (!element) {
-      return
-    }
-
-    const offset = 28
-    const top = window.scrollY + element.getBoundingClientRect().top - offset
-
-    setActiveSection(sectionId)
-    setJumpedSection(sectionId)
-
-    window.scrollTo({
-      top,
-      behavior: 'smooth',
-    })
-  }
-
-  useEffect(() => {
-    const elements = sections.map((section) => sectionRefs.current[section.id]).filter(Boolean)
-
-    if (!elements.length || typeof ResizeObserver === 'undefined') {
-      return undefined
-    }
-
-    const updateHeights = () => {
-      setSectionHeights((previous) => {
-        const next = { ...previous }
-
-        elements.forEach((element) => {
-          const id = element.getAttribute('data-about-section')
-
-          if (id) {
-            next[id] = Math.max(element.offsetHeight, 1)
-          }
-        })
-
-        return next
-      })
-    }
-
-    updateHeights()
-
-    const observer = new ResizeObserver(() => {
-      updateHeights()
-    })
-
-    elements.forEach((element) => observer.observe(element))
-    window.addEventListener('resize', updateHeights)
-
-    return () => {
-      observer.disconnect()
-      window.removeEventListener('resize', updateHeights)
-    }
-  }, [sections])
+    return () => window.removeEventListener('scroll', updateHeroState)
+  }, [])
 
   return (
-    <main className="page inner-page about-editorial-page about-film-layout">
-      <div className="about-film-content">
-        <RevealSection
-          className={`about-editorial-hero ${jumpedSection === 'intro' ? 'is-jumped-to' : ''}`}
-          delay={40}
-          data-about-section="intro"
-          ref={(node) => {
-            sectionRefs.current.intro = node
-          }}
-        >
-          <div className="about-editorial-copy">
-            <p className="eyebrow">About</p>
-            <h1>Software developer focused on clarity, structure, and dependable systems.</h1>
-            <p className="lede">{profile.intro}</p>
-            <p className="about-editorial-note">{profile.personalStatement}</p>
-          </div>
+    <main className="page about-page">
+      <RevealSection className={`about-hero${heroSoftened ? ' is-softened' : ''}`} delay={40}>
+        <div className="about-hero-copy">
+          <p className="eyebrow">About</p>
+          <h1 className="about-hero-headline about-hero-copy-item">{heroHeadline}</h1>
+          <p className="lede narrow">{profile.intro}</p>
+          <p className="about-hero-note">
+            I currently work on backend-heavy development, and I am especially interested in
+            programming-focused work where data structures, algorithms, and system logic matter.
+          </p>
+        </div>
 
-          <aside className="about-editorial-meta">
-            <div className="about-editorial-meta-block">
-              <p className="card-label">Currently</p>
-              <h2>{profile.shortName}</h2>
-              <p>{profile.summary}</p>
+        <aside className="about-hero-visual" aria-hidden="true">
+          <div className="about-tech-cluster cluster-one">
+            <span className="cluster-node" />
+            <span className="cluster-node" />
+            <span className="cluster-node" />
+            <span className="cluster-link link-a" />
+            <span className="cluster-link link-b" />
+          </div>
+          <div className="about-tech-cluster cluster-two">
+            <span className="cluster-node small" />
+            <span className="cluster-node small" />
+            <span className="cluster-node small" />
+            <span className="cluster-link vertical" />
+            <span className="cluster-link horizontal" />
+          </div>
+          <div className="about-tech-chip chip-one" />
+          <div className="about-tech-chip chip-two" />
+          <div className="about-desk-card">
+            <div className="about-window">
+              <span />
+              <span />
+              <span />
             </div>
-
-            <div className="about-editorial-meta-list">
-              <div>
-                <p className="card-label">Location</p>
-                <p>{profile.location}</p>
-              </div>
-              <div>
-                <p className="card-label">Email</p>
-                <p>{profile.email}</p>
-              </div>
-              <div>
-                <p className="card-label">Phone</p>
-                <p>{profile.phone}</p>
+            <div className="about-desk-illustration">
+              <div className="desk-glow" />
+              <div className="desk-laptop" />
+              <div className="desk-mug" />
+              <div className="desk-plant" />
+              <div className="desk-book" />
+              <div className="mini-person">
+                <div className="mini-hair" />
+                <div className="mini-head" />
+                <div className="mini-body" />
               </div>
             </div>
-          </aside>
-        </RevealSection>
-
-        <RevealSection
-          className={`about-editorial-section ${jumpedSection === 'experience' ? 'is-jumped-to' : ''}`}
-          delay={80}
-          data-about-section="experience"
-          ref={(node) => {
-            sectionRefs.current.experience = node
-          }}
-        >
-          <div className="section-heading">
-            <p className="eyebrow">Experience</p>
-            <h2>Recent roles and the work behind them.</h2>
           </div>
+        </aside>
+      </RevealSection>
 
-          <div className="about-editorial-timeline">
-            {experience.map((item) => (
-              <article className="about-editorial-row" key={item.role}>
-                <div className="about-editorial-period">{item.period}</div>
-                <div className="about-editorial-role">
-                  <h3>{item.role}</h3>
-                  <p>{item.company}</p>
-                </div>
-                <div className="about-editorial-body">
-                  <p>{item.description}</p>
-                  <ul className="bullet-list">
-                    {item.bullets.map((bullet) => (
-                      <li key={bullet}>{bullet}</li>
-                    ))}
-                  </ul>
-                </div>
-              </article>
-            ))}
+      <RevealSection
+        className="about-curtain-section about-story-grid"
+        delay={80}
+        ref={(node) => {
+          sectionRefs.current[0] = node
+        }}
+      >
+        <article className="about-story-card feature-panel">
+          <div className="about-card-copy">
+            <p className="card-label">A quick intro</p>
+            <h3>I like thoughtful products more than flashy ones.</h3>
+            <p>{profile.personalStatement}</p>
           </div>
-        </RevealSection>
-
-        <RevealSection
-          className={`about-editorial-section ${jumpedSection === 'capabilities' ? 'is-jumped-to' : ''}`}
-          delay={120}
-          data-about-section="capabilities"
-          ref={(node) => {
-            sectionRefs.current.capabilities = node
-          }}
-        >
-          <div className="section-heading">
-            <p className="eyebrow">Capabilities</p>
-            <h2>Tools, stacks, and fundamentals I keep returning to.</h2>
+          <div className="side-illustration notebook-illustration" aria-hidden="true">
+            <span className="note-sheet" />
+            <span className="note-line" />
+            <span className="note-line second" />
+            <span className="note-pin" />
           </div>
+        </article>
 
-          <div className="about-editorial-skills">
-            {skillGroups.map(([group, items]) => (
-              <article className="about-editorial-skill-group" key={group}>
-                <p className="group-title">{group}</p>
-                <div className="about-editorial-chip-wrap">
-                  {items.map((item) => (
-                    <span className="about-editorial-chip" key={item}>
-                      {item}
-                    </span>
+        <article className="about-story-card feature-panel">
+          <div className="about-card-copy">
+            <p className="card-label">What keeps me interested</p>
+            <h3>Programming depth with dependable software structure.</h3>
+            <p>
+              I am most comfortable on projects that need strong logic, structured APIs, and data
+              models that stay readable as the system grows.
+            </p>
+          </div>
+          <div className="side-illustration browser-illustration" aria-hidden="true">
+            <span className="browser-top" />
+            <span className="browser-panel left" />
+            <span className="browser-panel right" />
+          </div>
+        </article>
+      </RevealSection>
+
+      <RevealSection
+        className="about-curtain-section section split"
+        delay={120}
+        ref={(node) => {
+          sectionRefs.current[1] = node
+        }}
+      >
+        <div className="section-heading">
+          <p className="eyebrow">Experience</p>
+          <h2>Recent roles and the kind of work behind them.</h2>
+        </div>
+        <div className="timeline">
+          {experience.map((item, index) => (
+            <article className="timeline-item illustrated-timeline" key={item.role}>
+              <div className="timeline-illustration" aria-hidden="true">
+                <span className={`timeline-icon ${index === 0 ? 'network' : 'stack'}`} />
+              </div>
+              <div className="timeline-content">
+                <p className="timeline-period">{item.period}</p>
+                <h3>
+                  {item.role}
+                  <span>{item.company}</span>
+                </h3>
+                <p>{item.description}</p>
+                <ul className="bullet-list">
+                  {item.bullets.map((bullet) => (
+                    <li key={bullet}>{bullet}</li>
                   ))}
-                </div>
-              </article>
+                </ul>
+              </div>
+            </article>
+          ))}
+        </div>
+      </RevealSection>
+
+      <RevealSection
+        className="about-curtain-section section about-capabilities"
+        delay={160}
+        ref={(node) => {
+          sectionRefs.current[2] = node
+        }}
+      >
+        <div className="section-heading capabilities-heading">
+          <p className="eyebrow">Capabilities</p>
+          <h2>Tools, stacks, and foundations I keep returning to.</h2>
+        </div>
+        <article className="panel illustrated-panel">
+          <div className="skill-groups">
+            {skillGroups.map(([group, items]) => (
+              <div key={group}>
+                <p className="group-title">{group}</p>
+                <ul>
+                  {items.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </div>
             ))}
           </div>
-        </RevealSection>
+          <div className="panel-illustration chips-illustration" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </div>
+        </article>
+      </RevealSection>
 
-        <RevealSection
-          className={`about-editorial-grid ${jumpedSection === 'details' ? 'is-jumped-to' : ''}`}
-          delay={160}
-          data-about-section="details"
-          ref={(node) => {
-            sectionRefs.current.details = node
-          }}
-        >
-          <article className="about-editorial-panel">
-            <p className="card-label">Education</p>
+      <RevealSection
+        className="about-curtain-section section notes-grid"
+        delay={200}
+        ref={(node) => {
+          sectionRefs.current[3] = node
+        }}
+      >
+        <article className="panel about-info-panel">
+          <div className="panel-icon graduate-illustration" aria-hidden="true" />
+          <h3>Education</h3>
+          <div className="education-list">
             {education.map((item) => (
-              <div key={item.school} className="about-editorial-panel-block">
-                <h3>{item.degree}</h3>
+              <div key={item.school}>
+                {item.degree ? <p className="group-title">{item.degree}</p> : null}
                 <p>{item.school}</p>
                 <p>
                   {item.period} - {item.detail}
                 </p>
               </div>
             ))}
-          </article>
-
-          <article className="about-editorial-panel">
-            <p className="card-label">Strengths</p>
-            <div className="about-editorial-chip-wrap">
-              {extras.traits.map((item) => (
-                <span className="about-editorial-chip" key={item}>
-                  {item}
-                </span>
-              ))}
-            </div>
-          </article>
-
-          <article className="about-editorial-panel">
-            <p className="card-label">Beyond work</p>
-            <div className="about-editorial-chip-wrap">
-              {extras.interests.concat(extras.activities).map((item) => (
-                <span className="about-editorial-chip" key={item}>
-                  {item}
-                </span>
-              ))}
-            </div>
-          </article>
-        </RevealSection>
-      </div>
-
-      <aside className="about-film-rail" aria-label="Section film preview">
-        <div className="about-film-sticky">
-          <div className="about-film-strip">
-            <div className="about-film-perforation about-film-perforation-top" aria-hidden="true" />
-            <div className="about-film-perforation about-film-perforation-bottom" aria-hidden="true" />
-
-            {sections.map((section, index) => (
-              <button
-                type="button"
-                className={`about-film-frame ${activeSection === section.id ? 'is-active' : ''}`}
-                key={section.id}
-                style={{ flex: `${sectionHeights[section.id] || 1} 1 0%` }}
-                onClick={() => jumpToSection(section.id)}
-                aria-label={`Jump to ${section.label} section`}
-              >
-                <div className="about-film-image-stack" aria-hidden="true">
-                  {section.images.map((image, imageIndex) => (
-                    <div
-                      className="about-film-image"
-                      key={`${section.id}-${imageIndex}`}
-                      style={{
-                        backgroundImage: `url(${image})`,
-                        backgroundPosition: `center ${18 + imageIndex * 18}%`,
-                      }}
-                    />
-                  ))}
-                </div>
-                <div className="about-film-caption">
-                  <span>{String(index + 1).padStart(2, '0')}</span>
-                  <div className="about-film-caption-copy">
-                    <span>{section.label}</span>
-                    <small>{section.title}</small>
-                  </div>
-                </div>
-              </button>
-            ))}
           </div>
-        </div>
-      </aside>
+        </article>
+
+        <article className="panel about-info-panel">
+          <div className="panel-icon star-illustration" aria-hidden="true" />
+          <h3>Strengths</h3>
+          <ul className="tag-list">
+            {extras.traits.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </article>
+
+        <article className="panel about-info-panel">
+          <div className="panel-icon flower-illustration" aria-hidden="true" />
+          <h3>Beyond work</h3>
+          <ul className="tag-list">
+            {extras.interests.concat(extras.activities).map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </article>
+      </RevealSection>
     </main>
   )
 }
