@@ -87,6 +87,14 @@ function Layout() {
   }, [location.pathname])
 
   useEffect(() => {
+    document.body.classList.toggle('home-route', isHome)
+
+    return () => {
+      document.body.classList.remove('home-route')
+    }
+  }, [isHome])
+
+  useEffect(() => {
     const primary = auraRef.current
     const secondary = auraSecondaryRef.current
 
