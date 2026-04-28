@@ -7,6 +7,7 @@ const heroHeadline = "Hi, I'm Hanna. I build software that feels clear, dependab
 
 function AboutPage() {
   const sectionRefs = useRef([])
+  const capabilitiesPanelRef = useRef(null)
   const [heroSoftened, setHeroSoftened] = useState(false)
 
   useEffect(() => {
@@ -18,6 +19,71 @@ function AboutPage() {
     window.addEventListener('scroll', updateHeroState, { passive: true })
 
     return () => window.removeEventListener('scroll', updateHeroState)
+  }, [])
+
+  useEffect(() => {
+    const panel = capabilitiesPanelRef.current
+
+    if (!panel || typeof window === 'undefined') {
+      return undefined
+    }
+
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+
+    if (mediaQuery.matches) {
+      return undefined
+    }
+
+    let frameId = 0
+
+    const updateFromPointer = (event) => {
+      const rect = panel.getBoundingClientRect()
+      const x = (event.clientX - rect.left) / rect.width
+      const y = (event.clientY - rect.top) / rect.height
+      const rotateX = (0.5 - y) * 8
+      const rotateY = (x - 0.5) * 10
+
+      if (frameId) {
+        window.cancelAnimationFrame(frameId)
+      }
+
+      frameId = window.requestAnimationFrame(() => {
+        panel.style.setProperty('--capability-x', `${x}`)
+        panel.style.setProperty('--capability-y', `${y}`)
+        panel.style.setProperty('--capability-rotate-x', `${rotateX}deg`)
+        panel.style.setProperty('--capability-rotate-y', `${rotateY}deg`)
+      })
+    }
+
+    const resetPointer = () => {
+      if (frameId) {
+        window.cancelAnimationFrame(frameId)
+      }
+
+      frameId = window.requestAnimationFrame(() => {
+        panel.style.setProperty('--capability-x', '0.5')
+        panel.style.setProperty('--capability-y', '0.5')
+        panel.style.setProperty('--capability-rotate-x', '0deg')
+        panel.style.setProperty('--capability-rotate-y', '0deg')
+      })
+    }
+
+    panel.style.setProperty('--capability-x', '0.5')
+    panel.style.setProperty('--capability-y', '0.5')
+    panel.style.setProperty('--capability-rotate-x', '0deg')
+    panel.style.setProperty('--capability-rotate-y', '0deg')
+
+    panel.addEventListener('pointermove', updateFromPointer)
+    panel.addEventListener('pointerleave', resetPointer)
+
+    return () => {
+      panel.removeEventListener('pointermove', updateFromPointer)
+      panel.removeEventListener('pointerleave', resetPointer)
+
+      if (frameId) {
+        window.cancelAnimationFrame(frameId)
+      }
+    }
   }, [])
 
   return (
@@ -156,14 +222,22 @@ function AboutPage() {
           <p className="eyebrow">Capabilities</p>
           <h2>Tools, stacks, and foundations I keep returning to.</h2>
         </div>
-        <article className="panel illustrated-panel">
+        <article
+          className="panel illustrated-panel about-capabilities-panel"
+          ref={capabilitiesPanelRef}
+        >
+          <div className="about-capabilities-frame">
+            <span className="capabilities-orbit orbit-one" aria-hidden="true" />
+            <span className="capabilities-orbit orbit-two" aria-hidden="true" />
+            <span className="capabilities-orbit orbit-three" aria-hidden="true" />
+          </div>
           <div className="skill-groups">
             {skillGroups.map(([group, items]) => (
-              <div key={group}>
+              <div key={group} className="skill-group-card">
                 <p className="group-title">{group}</p>
                 <ul>
                   {items.map((item) => (
-                    <li key={item}>{item}</li>
+                    <li key={item} className="skill-pill">{item}</li>
                   ))}
                 </ul>
               </div>
@@ -173,6 +247,7 @@ function AboutPage() {
             <span />
             <span />
             <span />
+            <i className="chip-core" />
           </div>
         </article>
       </RevealSection>
